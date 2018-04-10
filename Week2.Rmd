@@ -1,0 +1,40 @@
+---
+title: "Developing Data Products - Assignment Week 2"
+author: "Andre Dannemann"
+date: "10 April 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## A map of buildings of MunichRE in Munich.
+
+
+```{r}
+library(leaflet)
+
+munichreLatLong <- data.frame (
+lat = c (48.156275, 48.155595, 48.156360, 48.158178, 48.174093),
+lng = c (11.588002, 11.588238, 11.584729, 11.589504, 11.594106))
+
+munichrePopups <- c(
+    "<a href='http://munichre.com/'>Main Building</a>",
+    "<a href='http://munichre.com/'>South 1</a>",
+    "<a href='http://munichre.com/'>West 5</a>",
+    "<a href='http://munichre.com/'>North 4</a>",
+    "<a href='http://munichre.com/'>North 6</a>"
+)
+
+munichreIcon <- makeIcon(
+    iconUrl = "Munich-Re-logo.jpg",
+    iconWidth = 30, iconHeight = 30,
+    iconAnchorX = 15, iconAnchorY = 15
+)
+
+munichreLatLong %>%
+    leaflet () %>%
+    addTiles () %>%
+    addMarkers (icon = munichreIcon, popup = munichrePopups)
+```
