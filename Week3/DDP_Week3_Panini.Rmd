@@ -1,0 +1,99 @@
+---
+title: "Developing Data Products - Assignment Week 3"
+author: "Andre Dannemann"
+date: "14 April 2018"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE)
+```
+
+## Week 3 Assignment - Costs of Panini Sticker Collection
+
+- <span style="font-size: 20px;">This is an R Markdown presentation on the cost of the Panini Sticker Collection for the World Soccer Championship 2018 in Russia.</span> 
+- <span style="font-size: 20px;">I don't know, if collecting stickers for a certain sports event is as popular in the US. In Europe, it is.</span>  
+- <span style="font-size: 20px;">For the world soccer championship 2018, Panini has a collection of 682 stickers. Each sticker costs 0.18 € (there are better offers, however, my calculations use the price of the single package with 5 stickers available at every store).</span>
+- <span style="font-size: 20px;">My code simulates 100 collections without trading with other collectors, so purchasing all cards until the book is complete.</span> 
+
+## Plotly plot
+  
+```{r libraries}
+library(ggplot2)
+library(plotly)
+```
+```{r collect_only}
+nr_of_collectors <- 1
+nr_of_sims <- 10
+book <- vector("numeric",length = 682)
+for(i in seq_along(book)) { book[i] = 0 }
+cost <- 0.00
+nr_of_cards <- vector("integer",length = 682)
+for(i in seq_along(nr_of_cards)) { nr_of_cards[i] = 0 }
+cost_vec <- vector("numeric", length = 682)
+for(i in seq_along(cost_vec)) { cost_vec[i] = 0.00 }
+collect_book_stats <- data.frame(nr_of_cards = 0, cost = 0.00)
+add_collect_book_stats <- data.frame(cbind(nr_of_cards, cost_vec))
+names(add_collect_book_stats) <- c("nr_of_cards", "cost")
+mean_book_stats <- data.frame(cbind(nr_of_cards, cost_vec), type_of_value = "simulation")
+#mean_book_stats
+```
+```{r}
+for(k in 1:nr_of_sims) {
+    for(i in 1:100000) {
+        card_nr <- runif(1, min = 1, max = 683)
+        cost <- cost + 0.18    
+        card_nr <- as.integer(card_nr)
+        if((book[card_nr] < nr_of_collectors)) {
+            book[card_nr] <- book[card_nr] + 1
+            cards_found <- sum(book) / nr_of_collectors
+            if((cards_found %% 1 ) == 0) {
+                add_collect_book_stats$nr_of_cards[cards_found] <- cards_found
+                add_collect_book_stats$cost[cards_found] <- cost / nr_of_collectors
+#                collect_book_stats <- rbind(collect_book_stats, add_collect_book_stats)            
+            }
+        }
+        if((sum(book) / nr_of_collectors) >= 682) {
+            collect_book_stats <- rbind(collect_book_stats, add_collect_book_stats)
+            break
+        }
+    }
+    for(m in 1:length(book)) { book[m] = 0 }
+#    for(m in 1:length(doubles)) { doubles[m] = 0 }
+#    for(m in 1:length(cost_vec)) { cost_vec[m] = 0 }
+    cost <- 0.00
+}
+```
+```{r}
+#head(collect_book_stats)
+#tail(collect_book_stats)
+#dim(collect_book_stats)
+#total_collect_stats
+#dim(collect_book_stats)
+#qplot(total_collect_stats$cost, binwidth = 10)
+#qplot(book, cost, data = collect_book_stats)
+```
+```{r my_values}
+rl_book_stats <- data.frame(nr_of_cards = c(54, 72, 91, 152),
+                            cost_vec = c(9.9, 13.5, 17.1, 31.5),
+                            type_of_value="real life")
+#rl_book_stats
+```
+```{r calc_mean}
+for(i in seq_along(mean_book_stats$nr_of_cards)) {
+    mean_book_stats$nr_of_cards[i] <- i
+    mean_book_stats$cost_vec[i] <- mean(collect_book_stats$cost[collect_book_stats$nr_of_cards == i])
+#    mean_book_stats$type_of_value[i] <- "simulation"
+}
+#head(mean_book_stats)
+#tail(mean_book_stats)
+#g <- ggplot(mean_book_stats, aes(nr_of_cards, cost_vec))
+#g <- g + geom_point()
+#g <- g + geom_point(data = rl_book_stats, color = "red")
+#g
+all_book_stats <- rbind(mean_book_stats, rl_book_stats)
+names(all_book_stats) <- c("nr_of_cards","costs","type_of_value")
+plot_ly(all_book_stats, x=~nr_of_cards, y=~costs, color=~factor(type_of_value))
+```
+  
+<span style="font-size: 20px;">The plot shows the simulations and my own experiences together. The "real life" points (four grey points) show my collection steps (up to now, 152 cards collected successfully).</span>
